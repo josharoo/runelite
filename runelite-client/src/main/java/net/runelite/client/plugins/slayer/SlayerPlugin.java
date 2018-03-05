@@ -27,6 +27,8 @@ package net.runelite.client.plugins.slayer;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
+import java.time.Instant;
+import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +96,8 @@ public class SlayerPlugin extends Plugin
 	private int streak;
 	private int points;
 	private int cachedXp;
+	private Instant infoTimer;
+	private String lastUsername;
 
 	@Override
 	protected void startUp() throws Exception
@@ -130,9 +134,13 @@ public class SlayerPlugin extends Plugin
 				amount = 0;
 				break;
 			case LOGGED_IN:
-				if (config.amount() != -1 && !config.taskName().isEmpty())
+				if (client.getUsername() != lastUsername)
 				{
+					if (config.amount() != -1 && !config.taskName().isEmpty())
+					{
 					setTask(config.taskName(), config.amount());
+					lastUsername = client.getUsername();
+					}
 				}
 				break;
 		}
@@ -181,6 +189,17 @@ public class SlayerPlugin extends Plugin
 					points = Integer.parseInt(mPoints.group(1));
 					break;
 				}
+			}
+		}
+
+		if (getInfoTimer() != null)
+		{
+			Duration statTimeout = Duration.ofMinutes(config.statTimeout());
+			Duration timeSinceInfobox = Duration.between(getInfoTimer(), Instant.now());
+
+			if (timeSinceInfobox.compareTo(statTimeout) >= 0)
+			{
+				removeCounter();
 			}
 		}
 	}
@@ -286,6 +305,7 @@ public class SlayerPlugin extends Plugin
 
 	private void killedOne()
 	{
+		addCounter(); //Have to add counter before changing values otherwise it throws a warning
 		if (amount == 0)
 		{
 			return;
@@ -332,6 +352,7 @@ public class SlayerPlugin extends Plugin
 			capsString(taskName), points, streak));
 
 		infoBoxManager.addInfoBox(counter);
+		setInfoTimer(Instant.now());
 	}
 
 	private void removeCounter()
@@ -390,6 +411,16 @@ public class SlayerPlugin extends Plugin
 	void setPoints(int points)
 	{
 		this.points = points;
+	}
+
+	public Instant getInfoTimer()
+	{
+		return infoTimer;
+	}
+
+	void setInfoTimer(Instant infoTimer)
+	{
+		this.infoTimer = infoTimer;
 	}
 
 	//Utils

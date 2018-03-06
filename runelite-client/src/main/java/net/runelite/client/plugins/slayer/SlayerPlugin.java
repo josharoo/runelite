@@ -134,12 +134,12 @@ public class SlayerPlugin extends Plugin
 				amount = 0;
 				break;
 			case LOGGED_IN:
-				if (client.getUsername() != lastUsername)
+				if (!client.getUsername().equals(lastUsername))
 				{
 					if (config.amount() != -1 && !config.taskName().isEmpty())
 					{
-					setTask(config.taskName(), config.amount());
-					lastUsername = client.getUsername();
+						setTask(config.taskName(), config.amount());
+						lastUsername = client.getUsername();
 					}
 				}
 				break;
@@ -305,7 +305,6 @@ public class SlayerPlugin extends Plugin
 
 	private void killedOne()
 	{
-		addCounter(); //Have to add counter before changing values otherwise it throws a warning
 		if (amount == 0)
 		{
 			return;
@@ -319,8 +318,10 @@ public class SlayerPlugin extends Plugin
 			return;
 		}
 
-		// update counter
+		// add and update counter, set timer
+		addCounter();
 		counter.setText(String.valueOf(amount));
+		setInfoTimer(Instant.now());
 	}
 
 	private void setTask(String name, int amt)
@@ -330,6 +331,7 @@ public class SlayerPlugin extends Plugin
 		save();
 		removeCounter();
 		addCounter();
+		setInfoTimer(Instant.now());
 	}
 
 	private void addCounter()
@@ -352,7 +354,6 @@ public class SlayerPlugin extends Plugin
 			capsString(taskName), points, streak));
 
 		infoBoxManager.addInfoBox(counter);
-		setInfoTimer(Instant.now());
 	}
 
 	private void removeCounter()

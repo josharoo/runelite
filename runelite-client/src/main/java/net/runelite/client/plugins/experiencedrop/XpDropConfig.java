@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2018, Cameron <https://github.com/noremac201>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,64 +22,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.rs.api;
+package net.runelite.client.plugins.experiencedrop;
 
-import net.runelite.api.World;
-import net.runelite.mapping.Import;
+import java.awt.Color;
+import net.runelite.client.config.Config;
+import net.runelite.client.config.ConfigGroup;
+import net.runelite.client.config.ConfigItem;
 
-public interface RSWorld extends World
+@ConfigGroup(
+	keyName = "xpdrop",
+	name = "XP Drop",
+	description = "Configuration for XP drop customization"
+)
+public interface XpDropConfig extends Config
 {
-	@Import("mask")
-	int getMask();
+	@ConfigItem(
+		keyName = "meleePrayerColor",
+		name = "Melee Prayer Color",
+		description = "XP drop color when a melee prayer is active"
+	)
+	default Color getMeleePrayerColor()
+	{
+		return new Color(0x15, 0x80, 0xAD);
+	}
 
-	@Import("mask")
-	void setMask(int mask);
+	@ConfigItem(
+		keyName = "rangePrayerColor",
+		name = "Range Prayer Color",
+		description = "XP drop color when a range prayer is active"
+	)
+	default Color getRangePrayerColor()
+	{
+		return new Color(0x15, 0x80, 0xAD);
+	}
 
-	@Import("playerCount")
-	@Override
-	int getPlayerCount();
-
-	@Import("playerCount")
-	@Override
-	void setPlayerCount(int playerCount);
-
-	@Import("location")
-	@Override
-	int getLocation();
-
-	@Import("location")
-	@Override
-	void setLocation(int location);
-
-	@Import("index")
-	@Override
-	int getIndex();
-
-	@Import("index")
-	@Override
-	void setIndex(int index);
-
-	@Import("id")
-	@Override
-	int getId();
-
-	@Import("id")
-	@Override
-	void setId(int id);
-
-	@Import("activity")
-	@Override
-	String getActivity();
-
-	@Import("activity")
-	@Override
-	void setActivity(String activity);
-
-	@Import("address")
-	@Override
-	String getAddress();
-
-	@Import("address")
-	@Override
-	void setAddress(String address);
+	@ConfigItem(
+		keyName = "magePrayerColor",
+		name = "Mage Prayer Color",
+		description = "XP drop color when a mage prayer is active"
+	)
+	default Color getMagePrayerColor()
+	{
+		return new Color(0x15, 0x80, 0xAD);
+	}
 }

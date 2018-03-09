@@ -56,9 +56,9 @@ public interface SlayerConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "statTimeout",
-			name = "InfoBox Expiry (minutes)",
-			description = "Set the time until the InfoBox expires"
+		keyName = "statTimeout",
+		name = "InfoBox Expiry (minutes)",
+		description = "Set the time until the InfoBox expires"
 	)
 	default int statTimeout()
 	{

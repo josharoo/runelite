@@ -98,6 +98,7 @@ public class SlayerPlugin extends Plugin
 	private int cachedXp;
 	private Instant infoTimer;
 	private String lastUsername;
+	private Duration statTimeout;
 
 	@Override
 	protected void startUp() throws Exception
@@ -107,6 +108,7 @@ public class SlayerPlugin extends Plugin
 			&& !config.taskName().isEmpty())
 		{
 			setTask(config.taskName(), config.amount());
+			statTimeout = Duration.ofMinutes(config.statTimeout());
 		}
 	}
 
@@ -192,10 +194,9 @@ public class SlayerPlugin extends Plugin
 			}
 		}
 
-		if (getInfoTimer() != null)
+		if (infoTimer != null)
 		{
-			Duration statTimeout = Duration.ofMinutes(config.statTimeout());
-			Duration timeSinceInfobox = Duration.between(getInfoTimer(), Instant.now());
+			Duration timeSinceInfobox = Duration.between(infoTimer, Instant.now());
 
 			if (timeSinceInfobox.compareTo(statTimeout) >= 0)
 			{
@@ -296,6 +297,7 @@ public class SlayerPlugin extends Plugin
 		if (config.showInfobox())
 		{
 			addCounter();
+			statTimeout = Duration.ofMinutes(config.statTimeout());
 		}
 		else
 		{
@@ -321,7 +323,7 @@ public class SlayerPlugin extends Plugin
 		// add and update counter, set timer
 		addCounter();
 		counter.setText(String.valueOf(amount));
-		setInfoTimer(Instant.now());
+		infoTimer = Instant.now();
 	}
 
 	private void setTask(String name, int amt)
@@ -331,7 +333,7 @@ public class SlayerPlugin extends Plugin
 		save();
 		removeCounter();
 		addCounter();
-		setInfoTimer(Instant.now());
+		infoTimer = Instant.now();
 	}
 
 	private void addCounter()
@@ -412,16 +414,6 @@ public class SlayerPlugin extends Plugin
 	void setPoints(int points)
 	{
 		this.points = points;
-	}
-
-	public Instant getInfoTimer()
-	{
-		return infoTimer;
-	}
-
-	void setInfoTimer(Instant infoTimer)
-	{
-		this.infoTimer = infoTimer;
 	}
 
 	//Utils

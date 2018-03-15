@@ -27,6 +27,8 @@ package net.runelite.client.plugins.slayer;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
+import java.time.Instant;
+import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,6 +97,9 @@ public class SlayerPlugin extends Plugin
 	private int streak;
 	private int points;
 	private int cachedXp;
+	private Instant infoTimer;
+	private String lastUsername;
+	private Duration statTimeout;
 
 	@Override
 	protected void startUp() throws Exception
@@ -104,6 +109,7 @@ public class SlayerPlugin extends Plugin
 			&& !config.taskName().isEmpty())
 		{
 			setTask(config.taskName(), config.amount());
+			statTimeout = Duration.ofMinutes(config.statTimeout());
 		}
 	}
 
@@ -131,9 +137,13 @@ public class SlayerPlugin extends Plugin
 				amount = 0;
 				break;
 			case LOGGED_IN:
-				if (config.amount() != -1 && !config.taskName().isEmpty())
+				if (!client.getUsername().equals(lastUsername))
 				{
-					setTask(config.taskName(), config.amount());
+					if (config.amount() != -1 && !config.taskName().isEmpty())
+					{
+						setTask(config.taskName(), config.amount());
+						lastUsername = client.getUsername();
+					}
 				}
 				break;
 		}
@@ -182,6 +192,16 @@ public class SlayerPlugin extends Plugin
 					points = Integer.parseInt(mPoints.group(1));
 					break;
 				}
+			}
+		}
+
+		if (infoTimer != null)
+		{
+			Duration timeSinceInfobox = Duration.between(infoTimer, Instant.now());
+
+			if (timeSinceInfobox.compareTo(statTimeout) >= 0)
+			{
+				removeCounter();
 			}
 		}
 	}
@@ -278,6 +298,7 @@ public class SlayerPlugin extends Plugin
 		if (config.showInfobox())
 		{
 			addCounter();
+			statTimeout = Duration.ofMinutes(config.statTimeout());
 		}
 		else
 		{
@@ -300,8 +321,10 @@ public class SlayerPlugin extends Plugin
 			return;
 		}
 
-		// update counter
+		// add and update counter, set timer
+		addCounter();
 		counter.setText(String.valueOf(amount));
+		infoTimer = Instant.now();
 	}
 
 	private void setTask(String name, int amt)
@@ -311,6 +334,7 @@ public class SlayerPlugin extends Plugin
 		save();
 		removeCounter();
 		addCounter();
+		infoTimer = Instant.now();
 	}
 
 	private void addCounter()
